@@ -7,6 +7,7 @@ from auctor.engine.policy import PolicyEngine
 from auctor.protocol.receipt import Receipt
 
 @click.group()
+@click.version_option()
 def main():
     pass
 
