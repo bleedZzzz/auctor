@@ -51,22 +51,60 @@ def issue(subject, tool, parent_file):
         json.dump(signed_mandate, f)
     click.echo(f"Mandate saved to {filename}")
 
-@main.command()
-@click.option("--chain-file", required=True, help="JSON file containing list of mandates")
-@click.option("--tool", required=True)
-def check(chain_file, tool):
-    with open(chain_file, "r") as f:
-        chain = json.load(f)
+from auctor.protocol.receipt import Receipt
 
-    if PolicyEngine.verify_chain(chain):
-        # Verify tool is in the leaf mandate
-        leaf_mandate = chain[-1]
-        if PolicyEngine.validate_action(leaf_mandate, tool):
-            click.echo(f"Authorized: Tool '{tool}' is permitted by the verified chain.")
-        else:
-            click.echo(f"Denied: Tool '{tool}' is NOT permitted.")
-    else:
-        click.echo("Denied: Invalid delegation chain or signature.")
+@main.command()
+@click.option("--mandate-file", required=True)
+@click.option("--tool", required=True)
+def run(mandate_file, tool):
+    """Simulate tool execution and generate receipt"""
+    with open(mandate_file, "r") as f:
+        mandate = json.load(f)
+
+    # Simplified enforcement
+    if not PolicyEngine.validate_action(mandate, tool):
+        click.echo("Denied")
+        return
+
+    # Simulate execution
+    input_data = {"test": "data"}
+    output_data = {"result": "success"}
+
+    # Sign receipt
+    with open("identity.json", "r") as f:
+        creds = json.load(f)
+    from cryptography.hazmat.primitives.asymmetric import ed25519
+    priv_key = ed25519.Ed25519PrivateKey.from_private_bytes(bytes.fromhex(creds["priv"]))
+    identity = Identity(priv_key)
+
+    receipt = Receipt(mandate["id"], tool, input_data, output_data)
+    signed_receipt = receipt.sign(identity)
+
+    filename = f"receipt_{mandate['id']}_{tool}.json"
+    with open(filename, "w") as f:
+        json.dump(signed_receipt, f)
+    click.echo(f"Action authorized. Receipt saved to {filename}")
+
+@main.command()
+@click.option("--receipt-file", required=True)
+def verify(receipt_file):
+    """Verify an evidence receipt"""
+    with open(receipt_file, "r") as f:
+        receipt = json.load(f)
+
+    # Verify signature
+    sig_data = receipt.pop("signature")
+    payload = jcs.canonicalize(receipt)
+    pub_bytes = bytes.fromhex(sig_data["pubkey"])
+    sig_bytes = bytes.fromhex(sig_data["value"])
+
+    from cryptography.hazmat.primitives.asymmetric import ed25519
+    try:
+        pub_key = ed25519.Ed25519PublicKey.from_public_bytes(pub_bytes)
+        pub_key.verify(sig_bytes, payload)
+        click.echo("✅ Receipt is authentic.")
+    except Exception:
+        click.echo("❌ Invalid Receipt Signature.")
 
 if __name__ == "__main__":
     main()
