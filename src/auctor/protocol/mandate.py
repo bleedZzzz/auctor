@@ -1,28 +1,25 @@
-import json
-import jcs
-import uuid
 from typing import List, Optional
 from auctor.identity.key import Identity
+from auctor.protocol.models import MandateModel
+import jcs
 
 class Mandate:
     def __init__(self, issuer_id: str, subject_id: str, tools: List[str], parent_id: Optional[str] = None):
-        self.data = {
-            "type": "mandate",
-            "id": f"m_{uuid.uuid4().hex[:8]}",
-            "issuer": issuer_id,
-            "subject": subject_id,
-            "capabilities": {"tools": tools},
-            "parent_id": parent_id
-        }
-        self.signature = None
+        self.model = MandateModel(
+            issuer=issuer_id,
+            subject=subject_id,
+            capabilities={"tools": tools},
+            parent_id=parent_id
+        )
 
     def sign(self, identity: Identity):
-        payload = jcs.canonicalize(self.data)
-        self.signature = {
+        data = self.model.model_dump(exclude={"signature"})
+        payload = jcs.canonicalize(data)
+        self.model.signature = {
             "pubkey": identity.get_public_bytes().hex(),
             "value": identity.sign(payload).hex()
         }
-        return {**self.data, "signature": self.signature}
+        return self.model.model_dump()
 
     @staticmethod
     def is_subset(child_tools: List[str], parent_tools: List[str]) -> bool:

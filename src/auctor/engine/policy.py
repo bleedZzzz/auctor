@@ -50,6 +50,7 @@ class PolicyEngine:
         if not sig_data:
             return False
 
+        # Use the same canonicalization as models
         payload = jcs.canonicalize({k: v for k, v in mandate.items() if k != "signature"})
         pub_bytes = bytes.fromhex(sig_data["pubkey"])
         sig_bytes = bytes.fromhex(sig_data["value"])
