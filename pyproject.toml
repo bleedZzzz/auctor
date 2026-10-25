@@ -1,0 +1,20 @@
+[project]
+name = "auctor"
+version = "0.1.0"
+description = "Proof-Carrying Agent Authority Runtime"
+dependencies = [
+    "cryptography>=42.0.0",
+    "jcs>=0.1.1",
+    "click>=8.1.0",
+    "pydantic>=2.0.0",
+]
+
+[project.scripts]
+auctor = "auctor.cli.main:main"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

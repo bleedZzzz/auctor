@@ -1,0 +1,2 @@
+[console_scripts]
+auctor = auctor.cli.main:main
