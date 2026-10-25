@@ -1,7 +1,26 @@
-.env
-identity.json
+# Python
 __pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
 build/
 *.egg-info/
 .pytest_cache/
 .venv/
+venv/
+
+# Secrets & Config
+.env
+identity.json
+
+# IDE
+.vscode/
+.idea/
+
+# Test artifacts
+mandate_*.json
+receipt_*.json
+parent.json
+child.json
+chain.json

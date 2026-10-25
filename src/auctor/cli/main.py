@@ -4,6 +4,7 @@ from cryptography.hazmat.primitives import serialization
 from auctor.identity.key import generate_identity, Identity
 from auctor.protocol.mandate import Mandate
 from auctor.engine.policy import PolicyEngine
+from auctor.protocol.receipt import Receipt
 
 @click.group()
 def main():
@@ -51,8 +52,6 @@ def issue(subject, tool, parent_file):
         json.dump(signed_mandate, f)
     click.echo(f"Mandate saved to {filename}")
 
-from auctor.protocol.receipt import Receipt
-
 @main.command()
 @click.option("--mandate-file", required=True)
 @click.option("--tool", required=True)
@@ -89,6 +88,7 @@ def run(mandate_file, tool):
 @click.option("--receipt-file", required=True)
 def verify(receipt_file):
     """Verify an evidence receipt"""
+    import jcs
     with open(receipt_file, "r") as f:
         receipt = json.load(f)
 
@@ -102,9 +102,9 @@ def verify(receipt_file):
     try:
         pub_key = ed25519.Ed25519PublicKey.from_public_bytes(pub_bytes)
         pub_key.verify(sig_bytes, payload)
-        click.echo("✅ Receipt is authentic.")
+        click.echo("Authorized: Receipt is authentic.")
     except Exception:
-        click.echo("❌ Invalid Receipt Signature.")
+        click.echo("Invalid Receipt Signature.")
 
 if __name__ == "__main__":
     main()
