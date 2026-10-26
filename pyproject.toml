@@ -2,12 +2,45 @@
 name = "auctor"
 version = "0.1.0"
 description = "Proof-Carrying Agent Authority Runtime"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+keywords = [
+    "open-source",
+    "ai-agents",
+    "agentic-ai",
+    "autonomous-agents",
+    "security",
+    "zero-trust",
+    "cryptography",
+    "authorization",
+    "audit-trail",
+    "access-control",
+    "ed25519",
+    "verifiable-credentials",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Security :: Cryptography",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
 dependencies = [
     "cryptography>=42.0.0",
     "jcs>=0.1.1",
     "click>=8.1.0",
     "pydantic>=2.10.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/bleedZzzz/auctor"
+Repository = "https://github.com/bleedZzzz/auctor.git"
+Issues = "https://github.com/bleedZzzz/auctor/issues"
 
 [project.scripts]
 auctor = "auctor.cli.main:main"

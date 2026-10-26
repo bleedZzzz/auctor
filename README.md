@@ -1,5 +1,12 @@
 # AUCTOR
 
+[![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://github.com/bleedZzzz/auctor)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![Security: Zero Trust](https://img.shields.io/badge/Security-Zero%20Trust-blueviolet.svg)](#security-guarantees)
+[![GitHub stars](https://img.shields.io/github/stars/bleedZzzz/auctor?style=social)](https://github.com/bleedZzzz/auctor/stargazers)
+
 **Autonomous agents. Bounded authority. Verifiable outcomes.**
 
 AUCTOR is a portable, independently verifiable runtime for governing agent authority. It ensures that AI agents operate only within explicit, cryptographically signed mandates, enforcing restrictions at the execution boundary and producing immutable evidence of every action taken.
