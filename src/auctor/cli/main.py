@@ -1,15 +1,20 @@
-import click
 import json
+
+import click
 from cryptography.hazmat.primitives import serialization
-from auctor.identity.key import generate_identity, Identity
-from auctor.protocol.mandate import Mandate
+from cryptography.hazmat.primitives.asymmetric import ed25519
+
 from auctor.engine.policy import PolicyEngine
+from auctor.identity.key import Identity, generate_identity
+from auctor.protocol.mandate import Mandate
 from auctor.protocol.receipt import Receipt
+
 
 @click.group()
 @click.version_option()
 def main():
     pass
+
 
 @main.command()
 def init():
@@ -18,7 +23,7 @@ def init():
     priv = identity._private_key.private_bytes(
         encoding=serialization.Encoding.Raw,
         format=serialization.PrivateFormat.Raw,
-        encryption_algorithm=serialization.NoEncryption()
+        encryption_algorithm=serialization.NoEncryption(),
     ).hex()
 
     click.echo(f"Identity generated. Public Key: {pub}")
@@ -35,7 +40,6 @@ def load_identity():
             "Identity not found. Run 'auctor init' first."
         ) from e
 
-    from cryptography.hazmat.primitives.asymmetric import ed25519
     priv_bytes = bytes.fromhex(creds["priv"])
     priv_key = ed25519.Ed25519PrivateKey.from_private_bytes(priv_bytes)
     return creds, Identity(priv_key)
@@ -57,11 +61,12 @@ def issue(subject, tool, parent_file):
     mandate = Mandate(creds["pub"], subject, list(tool), parent_id=parent_id)
     signed_mandate = mandate.sign(identity)
 
-    filename = f"mandate_{mandate.data['id']}.json"
+    filename = f"mandate_{signed_mandate['id']}.json"
     click.echo(json.dumps(signed_mandate, indent=2))
     with open(filename, "w") as f:
         json.dump(signed_mandate, f)
     click.echo(f"Mandate saved to {filename}")
+
 
 @main.command()
 @click.option("--mandate-file", required=True)
@@ -74,7 +79,7 @@ def run(mandate_file, tool):
     # Simplified enforcement
     if not PolicyEngine.validate_action(mandate, tool):
         click.echo("Denied")
-        return
+        raise SystemExit(1)
 
     # Simulate execution
     input_data = {"test": "data"}
@@ -91,11 +96,13 @@ def run(mandate_file, tool):
         json.dump(signed_receipt, f)
     click.echo(f"Action authorized. Receipt saved to {filename}")
 
+
 @main.command()
 @click.option("--receipt-file", required=True)
 def verify(receipt_file):
     """Verify an evidence receipt"""
     import jcs
+
     with open(receipt_file, "r") as f:
         receipt = json.load(f)
 
@@ -105,13 +112,14 @@ def verify(receipt_file):
     pub_bytes = bytes.fromhex(sig_data["pubkey"])
     sig_bytes = bytes.fromhex(sig_data["value"])
 
-    from cryptography.hazmat.primitives.asymmetric import ed25519
     try:
         pub_key = ed25519.Ed25519PublicKey.from_public_bytes(pub_bytes)
         pub_key.verify(sig_bytes, payload)
         click.echo("Authorized: Receipt is authentic.")
     except Exception:
         click.echo("Invalid Receipt Signature.")
+        raise SystemExit(1)
+
 
 if __name__ == "__main__":
     main()
