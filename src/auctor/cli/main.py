@@ -25,18 +25,28 @@ def init():
     with open("identity.json", "w") as f:
         json.dump({"pub": pub, "priv": priv}, f)
 
+
+def load_identity():
+    try:
+        with open("identity.json", "r") as f:
+            creds = json.load(f)
+    except FileNotFoundError as e:
+        raise click.ClickException(
+            "Identity not found. Run 'auctor init' first."
+        ) from e
+
+    from cryptography.hazmat.primitives.asymmetric import ed25519
+    priv_bytes = bytes.fromhex(creds["priv"])
+    priv_key = ed25519.Ed25519PrivateKey.from_private_bytes(priv_bytes)
+    return creds, Identity(priv_key)
+
+
 @main.command()
 @click.option("--subject", required=True)
 @click.option("--tool", multiple=True)
 @click.option("--parent-file", help="Path to parent mandate JSON")
 def issue(subject, tool, parent_file):
-    with open("identity.json", "r") as f:
-        creds = json.load(f)
-
-    from cryptography.hazmat.primitives.asymmetric import ed25519
-    priv_bytes = bytes.fromhex(creds["priv"])
-    priv_key = ed25519.Ed25519PrivateKey.from_private_bytes(priv_bytes)
-    identity = Identity(priv_key)
+    creds, identity = load_identity()
 
     parent_id = None
     if parent_file:
@@ -71,11 +81,7 @@ def run(mandate_file, tool):
     output_data = {"result": "success"}
 
     # Sign receipt
-    with open("identity.json", "r") as f:
-        creds = json.load(f)
-    from cryptography.hazmat.primitives.asymmetric import ed25519
-    priv_key = ed25519.Ed25519PrivateKey.from_private_bytes(bytes.fromhex(creds["priv"]))
-    identity = Identity(priv_key)
+    _, identity = load_identity()
 
     receipt = Receipt(mandate["id"], tool, input_data, output_data)
     signed_receipt = receipt.sign(identity)
