@@ -9,7 +9,7 @@
 
 **Autonomous agents. Bounded authority. Verifiable outcomes.**
 
-AUCTOR is a portable, independently verifiable runtime for governing agent authority. It ensures that AI agents operate only within explicit, cryptographically signed mandates, enforcing restrictions at the execution boundary and producing immutable evidence of every action taken.
+AUCTOR is an open-source, portable, independently verifiable runtime for governing AI agent authority, combining AI security, policy-as-code, and identity management.
 
 ## The Problem
 As AI agents gain the ability to invoke tools and access sensitive systems, providing them with unrestricted authority becomes a critical security risk. Traditional solutions often rely on proprietary runtimes, complex TEEs, or centralized black-box APIs. 
